@@ -1,0 +1,67 @@
+function! tabline#MyTabline()
+    let s = ''
+    let tabCount = tabpagenr('$')
+    for i in range(tabCount)
+        let tabNum = i + 1
+        let winNum = tabpagewinnr(tabNum)
+        let buflist = tabpagebuflist(tabNum)
+        let bufNum = buflist[winNum - 1]
+        let bufName = bufname(bufNum)
+
+        let bufmodified = 0
+        for b in buflist
+            if getbufvar(b, "&modified")
+                let bufmodified = 1
+                break
+            endif
+        endfor
+
+        let fname = '' 
+        let buftype = getbufvar(bufNum, "&buftype")
+        if buftype == ''
+            if bufName != ''
+                let fname = fnamemodify(bufName, ':t')
+            else
+                let fname = '[No Name]'
+            endif
+        elseif buftype == 'quickfix'
+            let fname = '[Quickfix List]'
+        elseif buftype == 'help'
+            let fname = '[Help]'
+        else
+            let fname = '[' . bufName . ']'
+        endif
+
+        " select the highlighting
+        let hl = tabNum == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+        let s .= hl
+
+        " set the tab page number (for mouse clicks)
+        let s .= '%' . tabNum . 'T'
+
+        let s .= ' [' . tabNum . '] '
+
+        if exists('g:tabline_show_wins_count')
+            let winCount = tabpagewinnr(tabNum, '$')
+            if winCount > 1
+                let s .= "%#TabWinsCount#" . winCount . hl . ' '
+            endif
+        endif
+
+        let s .= fname . ' '
+
+        if bufmodified
+            let s .= '+ '
+        endif
+    endfor
+
+    " after the last tab fill with TabLineFill and reset tab page nr
+    let s .= '%#TabLineFill#%T'
+
+    " right-align the label to close the current tab page
+    if tabCount > 1
+        let s .= '%=%#TabLine#%999XX'
+    endif
+
+    return s
+endfunction
