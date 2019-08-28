@@ -5,7 +5,7 @@ function! s:GetCurrBufNames(tabCount)
         let winNum = tabpagewinnr(tabNum)
         let buflist = tabpagebuflist(tabNum)
         let bufNum = buflist[winNum - 1]
-        let bufName = bufname(bufNum)
+        let bufName = fnamemodify(bufname(bufNum), ':~:.')
         let baseName = fnamemodify(bufName, ':t')
         let bufNames[tabNum] = {}
         let bufNames[tabNum]["fn"] = bufName
@@ -13,13 +13,21 @@ function! s:GetCurrBufNames(tabCount)
         let bufNames[tabNum]["sn"] = baseName
     endfor
 
+    let bnGroup = {}
     for [tabNum, name] in items(bufNames)
-        for [inTabNum, inNames] in items(bufNames)
-            if inTabNum != tabNum && name["bn"] ==# inNames["bn"]
+        let bn = name["bn"]
+        if !has_key(bnGroup, bn)
+            let bnGroup[bn] = []
+        endif
+        let bnGroup[bn] = add(bnGroup[bn], tabNum)
+    endfor
+
+    for tabNums in values(bnGroup)
+        if len(tabNums) > 1
+            for tabNum in tabNums
                 let bufNames[tabNum]["sn"] = bufNames[tabNum]["fn"]
-                break
-            endif
-        endfor
+            endfor
+        endif
     endfor
 
     return bufNames
