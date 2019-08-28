@@ -1,12 +1,40 @@
-function! tabline#MyTabline()
-    let s = ''
-    let tabCount = tabpagenr('$')
-    for i in range(tabCount)
+function! s:GetCurrBufNames(tabCount)
+    let bufNames = {}
+    for i in range(a:tabCount)
         let tabNum = i + 1
         let winNum = tabpagewinnr(tabNum)
         let buflist = tabpagebuflist(tabNum)
         let bufNum = buflist[winNum - 1]
         let bufName = bufname(bufNum)
+        let baseName = fnamemodify(bufName, ':t')
+        let bufNames[tabNum] = {}
+        let bufNames[tabNum]["fn"] = bufName
+        let bufNames[tabNum]["bn"] = baseName
+        let bufNames[tabNum]["sn"] = baseName
+    endfor
+
+    for [tabNum, name] in items(bufNames)
+        for [inTabNum, inNames] in items(bufNames)
+            if inTabNum != tabNum && name["bn"] ==# inNames["bn"]
+                let bufNames[tabNum]["sn"] = bufNames[tabNum]["fn"]
+                break
+            endif
+        endfor
+    endfor
+
+    return bufNames
+endfunction
+
+function! tabline#MyTabline()
+    let s = ''
+    let tabCount = tabpagenr('$')
+    let bufNames = s:GetCurrBufNames(tabCount)
+    for i in range(tabCount)
+        let tabNum = i + 1
+        let winNum = tabpagewinnr(tabNum)
+        let buflist = tabpagebuflist(tabNum)
+        let bufNum = buflist[winNum - 1]
+        let bufName = bufNames[tabNum]["sn"]
 
         let bufmodified = 0
         for b in buflist
@@ -19,11 +47,7 @@ function! tabline#MyTabline()
         let fname = '' 
         let buftype = getbufvar(bufNum, "&buftype")
         if buftype == ''
-            if bufName != ''
-                let fname = fnamemodify(bufName, ':t')
-            else
-                let fname = '[No Name]'
-            endif
+            let fname = bufName != "" ? bufName : '[No Name]'
         elseif buftype == 'quickfix'
             let fname = '[Quickfix List]'
         elseif buftype == 'help'

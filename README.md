@@ -13,7 +13,7 @@ Vim custom tab line with tab number.
 ![vim-tabline](_assets/tabline.png)  
 # Features
 - tab number
-- base file name
+- base file name(full path if has same basename tab)
 - modified flag
 - windows count(default disabled)
 
