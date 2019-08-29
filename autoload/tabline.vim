@@ -5,7 +5,10 @@ function! s:GetCurrBufNames(tabCount)
         let winNum = tabpagewinnr(tabNum)
         let buflist = tabpagebuflist(tabNum)
         let bufNum = buflist[winNum - 1]
-        let bufName = fnamemodify(bufname(bufNum), ':~:.')
+        let bufName = bufname(bufNum)
+        if bufName != ""
+            let bufName = fnamemodify(bufName, ':~:.')
+        endif
         let baseName = fnamemodify(bufName, ':t')
         let bufNames[tabNum] = {}
         let bufNames[tabNum]["fn"] = bufName
