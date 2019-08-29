@@ -6,19 +6,19 @@ function! s:GetCurrBufNames(tabCount)
         let buflist = tabpagebuflist(tabNum)
         let bufNum = buflist[winNum - 1]
         let bufName = bufname(bufNum)
-        if bufName != ""
+        if bufName !=# ''
             let bufName = fnamemodify(bufName, ':~:.')
         endif
         let baseName = fnamemodify(bufName, ':t')
         let bufNames[tabNum] = {}
-        let bufNames[tabNum]["fn"] = bufName
-        let bufNames[tabNum]["bn"] = baseName
-        let bufNames[tabNum]["sn"] = baseName
+        let bufNames[tabNum]['fn'] = bufName
+        let bufNames[tabNum]['bn'] = baseName
+        let bufNames[tabNum]['sn'] = baseName
     endfor
 
     let bnGroup = {}
     for [tabNum, name] in items(bufNames)
-        let bn = name["bn"]
+        let bn = name['bn']
         if !has_key(bnGroup, bn)
             let bnGroup[bn] = []
         endif
@@ -28,7 +28,7 @@ function! s:GetCurrBufNames(tabCount)
     for tabNums in values(bnGroup)
         if len(tabNums) > 1
             for tabNum in tabNums
-                let bufNames[tabNum]["sn"] = bufNames[tabNum]["fn"]
+                let bufNames[tabNum]['sn'] = bufNames[tabNum]['fn']
             endfor
         endif
     endfor
@@ -45,23 +45,23 @@ function! tabline#MyTabline()
         let winNum = tabpagewinnr(tabNum)
         let buflist = tabpagebuflist(tabNum)
         let bufNum = buflist[winNum - 1]
-        let bufName = bufNames[tabNum]["sn"]
+        let bufName = bufNames[tabNum]['sn']
 
         let bufmodified = 0
         for b in buflist
-            if getbufvar(b, "&modified")
+            if getbufvar(b, '&modified')
                 let bufmodified = 1
                 break
             endif
         endfor
 
         let fname = '' 
-        let buftype = getbufvar(bufNum, "&buftype")
-        if buftype == ''
-            let fname = bufName != "" ? bufName : '[No Name]'
-        elseif buftype == 'quickfix'
+        let buftype = getbufvar(bufNum, '&buftype')
+        if buftype ==# ''
+            let fname = bufName !=# '' ? bufName : '[No Name]'
+        elseif buftype ==# 'quickfix'
             let fname = '[Quickfix List]'
-        elseif buftype == 'help'
+        elseif buftype ==# 'help'
             let fname = '[Help]'
         else
             let fname = '[' . bufName . ']'
@@ -79,7 +79,7 @@ function! tabline#MyTabline()
         if exists('g:tabline_show_wins_count')
             let winCount = tabpagewinnr(tabNum, '$')
             if winCount > 1
-                let s .= "%#TabWinsCount#" . winCount . hl . ' '
+                let s .= '%#TabWinsCount#' . winCount . hl . ' '
             endif
         endif
 
